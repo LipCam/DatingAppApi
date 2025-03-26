@@ -30,7 +30,7 @@ namespace DatingAppApi.API.Middleware
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
                 var response = Environment.IsDevelopment()
-                    ? new ApiException(context.Response.StatusCode, ex.Message, ex.StackTrace)
+                    ? new ApiException(context.Response.StatusCode, ex.Message, (ex.InnerException != null ? ex.InnerException.Message : ex.StackTrace))
                     : new ApiException(context.Response.StatusCode, ex.Message, "Internal server error");
 
                 var option = new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
