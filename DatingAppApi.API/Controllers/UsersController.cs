@@ -2,6 +2,7 @@ using DatingAppApi.API.Extensions;
 using DatingAppApi.API.Services.Interfaces;
 using DatingAppApi.BLL.DTOs;
 using DatingAppApi.BLL.DTOs.Users;
+using DatingAppApi.BLL.Helpers;
 using DatingAppApi.BLL.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,9 +22,15 @@ namespace DatingAppApi.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult> GetAll()
+        public async Task<ActionResult> GetAll([FromQuery]UserParams userParams)
         {
-            return Ok(await _service.GetAllUserAsync());
+            userParams.CurrentUserName = User.GetUserName();
+
+            var users = await _service.GetAllUserAsync(userParams);
+
+            Response.AddPaginationHeader(users);
+
+            return Ok(users);
         }
         
         //[HttpGet("{Id}")]

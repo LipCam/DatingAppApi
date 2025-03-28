@@ -1,4 +1,5 @@
 ﻿using DatingAppApi.DAL.Entities;
+using System.Linq.Expressions;
 
 namespace DatingAppApi.DAL.Repositories.Interfaces
 {
@@ -6,6 +7,6 @@ namespace DatingAppApi.DAL.Repositories.Interfaces
     {
         Task<bool> UserExistsAsync(string userName);
         Task<AppUsers> GetUserByUserNameAsync(string userName);
-        Task<List<AppUsers>> GetAllUserAsync();
+        Task<List<AppUsers>> GetAllUserAsync(Expression<Func<AppUsers, bool>> filter = null);
     }
 }

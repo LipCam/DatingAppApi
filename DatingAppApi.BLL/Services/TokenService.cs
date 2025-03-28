@@ -29,7 +29,8 @@ namespace DatingAppApi.BLL.Services
 
             var claims = new List<Claim>()
             {
-                new Claim(ClaimTypes.NameIdentifier, appUsers.UserName!)
+                new Claim(ClaimTypes.NameIdentifier, appUsers.Id.ToString()),
+                new Claim(ClaimTypes.Name, appUsers.UserName!)
             };
 
             var tokenDescription = new SecurityTokenDescriptor()

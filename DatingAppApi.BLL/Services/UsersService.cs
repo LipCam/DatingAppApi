@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DatingAppApi.BLL.DTOs.Users;
+using DatingAppApi.BLL.Helpers;
 using DatingAppApi.BLL.Services.Interfaces;
 using DatingAppApi.DAL.Entities;
 using DatingAppApi.DAL.Repositories.Interfaces;
@@ -38,9 +39,9 @@ namespace DatingAppApi.BLL.Services
             return await _repository.AddAsync(entity);
         }
 
-        public void Update(AppUsers entity)
+        public async Task Update(AppUsers entity)
         {
-            _repository.Update(entity);
+            await _repository.Update(entity);
         }
 
         public void Delete(AppUsers entity)
@@ -54,10 +55,33 @@ namespace DatingAppApi.BLL.Services
             return _mapper.Map<MemberDTO>(user);
         }
 
-        public async Task<List<MemberDTO>> GetAllUserAsync()
+        //public async Task<List<MemberDTO>> GetAllUserAsync()
+        //{
+        //    var users = await _repository.GetAllUserAsync();            
+        //    return _mapper.Map<List<MemberDTO>>(users);
+        //}
+        public async Task<PagedList<MemberDTO>> GetAllUserAsync(UserParams userParams)
         {
-            var users = await _repository.GetAllUserAsync();            
-            return _mapper.Map<List<MemberDTO>>(users);
+            var mimDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge - 1));
+            var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
+
+            var users = await _repository.GetAllUserAsync(p=> p.UserName != userParams.CurrentUserName 
+                                                                && (string.IsNullOrEmpty(userParams.Gender) || p.Gender == userParams.Gender)
+                                                                && p.DateOfBirth >= mimDob && p.DateOfBirth <= maxDob);
+
+            switch (userParams.Orderby)
+            {
+                case "created":
+                    users = users.OrderByDescending(p => p.Created).ToList();
+                    break;
+                default:
+                    users = users.OrderByDescending(p => p.LastActive).ToList();
+                    break;
+            }            
+
+            var lst = _mapper.Map<List<MemberDTO>>(users);
+
+            return PagedList<MemberDTO>.Create(lst, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<string> UpdateUser(string userName, MemberUpdateDTO memberUpdateDTO)

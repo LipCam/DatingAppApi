@@ -2,6 +2,7 @@
 using DatingAppApi.DAL.Entities;
 using DatingAppApi.DAL.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace DatingAppApi.DAL.Repositories
 {
@@ -11,9 +12,9 @@ namespace DatingAppApi.DAL.Repositories
         {
         }
 
-        public async Task<List<AppUsers>> GetAllUserAsync()
+        public async Task<List<AppUsers>> GetAllUserAsync(Expression<Func<AppUsers, bool>> filter = null)
         {
-            return await _dbContext.AppUsers
+            return await _dbContext.AppUsers.Where(filter)
                 .Include(x=>x.Photos)
                 .ToListAsync();
         }

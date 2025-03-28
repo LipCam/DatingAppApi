@@ -46,7 +46,8 @@ namespace DatingAppApi.BLL.Services
                 {
                     UserName = appUser.UserName!,
                     KnownAs = appUser.KnownAs,
-                    Token = resultToken.Value
+                    Token = resultToken.Value,
+                    Gender = appUser.Gender,
                 };
                 return ResultDTO<UsersRespDTO>.Success(usersRespDTO);
             }
@@ -80,6 +81,7 @@ namespace DatingAppApi.BLL.Services
                 UserName = appUser.UserName!,
                 KnownAs = appUser.KnownAs,
                 Token = resultToken.Value,
+                Gender = appUser.Gender,
                 PhotoUrl = appUser.Photos.FirstOrDefault(p=> p.IsMain)?.Url
             };
 
