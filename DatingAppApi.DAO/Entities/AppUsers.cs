@@ -36,6 +36,8 @@ namespace DatingAppApi.DAL.Entities
         public required string Country { get; set; }
 
         public List<Photos> Photos { get; set; } = [];
+        public List<UserLikes> LikedByUsers { get; set; } = [];
+        public List<UserLikes> LikedUsers { get; set; } = [];
     }
 }
 
