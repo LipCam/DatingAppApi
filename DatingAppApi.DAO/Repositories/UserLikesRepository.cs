@@ -24,12 +24,11 @@ namespace DatingAppApi.DAL.Repositories
             _dbContext.Remove(like);
         }
 
-        public async Task<IEnumerable<long>> GetCurrentUserLikeIds(long currentUserId)
+        public IQueryable<long> GetCurrentUserLikeIds(long currentUserId)
         {
-            return await _dbContext.UserLikes
+            return _dbContext.UserLikes
                 .Where(p => p.SourceUserId == currentUserId)
-                .Select(p => p.TargetUserId)
-                .ToListAsync();
+                .Select(p => p.TargetUserId);
         }
 
         public async Task<UserLikes?> GetUserLike(long sourceUserId, long targetUserId)
@@ -37,34 +36,57 @@ namespace DatingAppApi.DAL.Repositories
             return await _dbContext.UserLikes.FindAsync(sourceUserId, targetUserId);
         }
 
-        public async Task<IEnumerable<AppUsers>> GetUserLikes(string predicate, long userId)
+        public IQueryable<AppUsers> GetUserLikes(string predicate, long userId)
         {
             var likes = _dbContext.UserLikes.AsQueryable();
 
             switch (predicate)
             {
                 case "liked":
-                    return await likes
-                        .Where(p=> p.SourceUserId == userId)
-                        .Include(p=> p.TargetUser.Photos)
-                        .Select(p=> p.TargetUser)
-                        .ToListAsync();
+                    return likes
+                        .Where(p => p.SourceUserId == userId)
+                        .Select(p => p.TargetUser);
                 case "likedBy":
-                    return await likes
+                    return  likes
                         .Where(p => p.TargetUserId == userId)
-                        .Include(p => p.SourceUser.Photos)
-                        .Select(p => p.SourceUser)
-                        .ToListAsync();
+                        .Select(p => p.SourceUser);
                 default:
-                    var likeIds = await GetCurrentUserLikeIds(userId);
+                    var likeIds =  GetCurrentUserLikeIds(userId);
 
-                    return await likes
+                    return  likes
                         .Where(p => p.TargetUserId == userId && likeIds.Contains(p.SourceUserId))
-                        .Include(p => p.SourceUser.Photos)
-                        .Select(p => p.SourceUser)
-                        .ToListAsync();
+                        .Select(p => p.SourceUser);
             }
         }
+
+        //public async Task<IEnumerable<AppUsers>> GetUserLikes(string predicate, long userId)
+        //{
+        //    var likes = _dbContext.UserLikes.AsQueryable();
+
+        //    switch (predicate)
+        //    {
+        //        case "liked":
+        //            return await likes
+        //                .Where(p=> p.SourceUserId == userId)
+        //                .Include(p=> p.TargetUser.Photos)
+        //                .Select(p=> p.TargetUser)
+        //                .ToListAsync();
+        //        case "likedBy":
+        //            return await likes
+        //                .Where(p => p.TargetUserId == userId)
+        //                .Include(p => p.SourceUser.Photos)
+        //                .Select(p => p.SourceUser)
+        //                .ToListAsync();
+        //        default:
+        //            var likeIds = await GetCurrentUserLikeIds(userId);
+
+        //            return await likes
+        //                .Where(p => p.TargetUserId == userId && likeIds.Contains(p.SourceUserId))
+        //                .Include(p => p.SourceUser.Photos)
+        //                .Select(p => p.SourceUser)
+        //                .ToListAsync();
+        //    }
+        //}
 
         public async Task<bool> SaveChanges()
         {

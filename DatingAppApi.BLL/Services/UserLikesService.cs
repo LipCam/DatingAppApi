@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DatingAppApi.BLL.DTOs;
 using DatingAppApi.BLL.DTOs.Users;
 using DatingAppApi.BLL.Helpers;
 using DatingAppApi.BLL.Services.Interfaces;
 using DatingAppApi.DAL.Entities;
 using DatingAppApi.DAL.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppApi.BLL.Services
 {
@@ -57,7 +59,7 @@ namespace DatingAppApi.BLL.Services
 
         public async Task<IEnumerable<long>> GetCurrentUserLikeIds(long currentUserId)
         {
-            return await _repository.GetCurrentUserLikeIds(currentUserId);
+            return await _repository.GetCurrentUserLikeIds(currentUserId).ToListAsync();
         }
 
         public async Task<UserLikes?> GetUserLike(long sourceUserId, long targetUserId)
@@ -67,11 +69,11 @@ namespace DatingAppApi.BLL.Services
 
         public async Task<PagedList<MemberDTO>> GetUserLikes(UserLikesParams userLikesParams)
         {
-            var userLikes = await _repository.GetUserLikes(userLikesParams.Predicate, userLikesParams.UserId);
+            var userLikes = _repository.GetUserLikes(userLikesParams.Predicate, userLikesParams.UserId);
 
-            var lst = _mapper.Map<List<MemberDTO>>(userLikes);
+            var lst = userLikes.ProjectTo<MemberDTO>(_mapper.ConfigurationProvider);
 
-            return PagedList<MemberDTO>.Create(lst, userLikesParams.PageNumber, userLikesParams.PageSize);
+            return await PagedList<MemberDTO>.CreateAsync(lst, userLikesParams.PageNumber, userLikesParams.PageSize);
         }        
     }
 }

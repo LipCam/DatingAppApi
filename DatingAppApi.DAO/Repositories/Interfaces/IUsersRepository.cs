@@ -7,6 +7,6 @@ namespace DatingAppApi.DAL.Repositories.Interfaces
     {
         Task<bool> UserExistsAsync(string userName);
         Task<AppUsers> GetUserByUserNameAsync(string userName);
-        Task<List<AppUsers>> GetAllUserAsync(Expression<Func<AppUsers, bool>> filter = null);
+        IQueryable<AppUsers> GetAllUserAsync(Expression<Func<AppUsers, bool>> filter = null);
     }
 }

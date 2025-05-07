@@ -12,11 +12,9 @@ namespace DatingAppApi.DAL.Repositories
         {
         }
 
-        public async Task<List<AppUsers>> GetAllUserAsync(Expression<Func<AppUsers, bool>> filter = null)
+        public IQueryable<AppUsers> GetAllUserAsync(Expression<Func<AppUsers, bool>> filter = null)
         {
-            return await _dbContext.AppUsers.Where(filter)
-                .Include(x=>x.Photos)
-                .ToListAsync();
+            return _dbContext.AppUsers.Where(filter);
         }
 
         public async Task<AppUsers?> GetUserByUserNameAsync(string userName)

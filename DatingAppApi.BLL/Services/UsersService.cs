@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using DatingAppApi.BLL.DTOs.Users;
 using DatingAppApi.BLL.Helpers;
 using DatingAppApi.BLL.Services.Interfaces;
 using DatingAppApi.DAL.Entities;
 using DatingAppApi.DAL.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace DatingAppApi.BLL.Services
@@ -65,23 +67,23 @@ namespace DatingAppApi.BLL.Services
             var mimDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge - 1));
             var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
 
-            var users = await _repository.GetAllUserAsync(p=> p.UserName != userParams.CurrentUserName 
+            var users = _repository.GetAllUserAsync(p=> p.UserName != userParams.CurrentUserName 
                                                                 && (string.IsNullOrEmpty(userParams.Gender) || p.Gender == userParams.Gender)
                                                                 && p.DateOfBirth >= mimDob && p.DateOfBirth <= maxDob);
 
             switch (userParams.Orderby)
             {
                 case "created":
-                    users = users.OrderByDescending(p => p.Created).ToList();
+                    users = users.OrderByDescending(p => p.Created);
                     break;
                 default:
-                    users = users.OrderByDescending(p => p.LastActive).ToList();
+                    users = users.OrderByDescending(p => p.LastActive);
                     break;
-            }            
+            }
+            
+            var lst = users.ProjectTo<MemberDTO>(_mapper.ConfigurationProvider);
 
-            var lst = _mapper.Map<List<MemberDTO>>(users);
-
-            return PagedList<MemberDTO>.Create(lst, userParams.PageNumber, userParams.PageSize);
+            return await PagedList<MemberDTO>.CreateAsync(lst, userParams.PageNumber, userParams.PageSize);
         }
 
         public async Task<string> UpdateUser(string userName, MemberUpdateDTO memberUpdateDTO)

@@ -6,9 +6,11 @@ namespace DatingAppApi.DAL.Repositories.Interfaces
     {
         Task<UserLikes?> GetUserLike(long sourceUserId, long targetUserId);
 
-        Task<IEnumerable<AppUsers>> GetUserLikes(string predicate, long userId);
+        //Task<IEnumerable<AppUsers>> GetUserLikes(string predicate, long userId);
+        IQueryable<AppUsers> GetUserLikes(string predicate, long userId);
 
-        Task<IEnumerable<long>> GetCurrentUserLikeIds(long currentUserId);
+        //Task<IEnumerable<long>> GetCurrentUserLikeIds(long currentUserId);
+        IQueryable<long> GetCurrentUserLikeIds(long currentUserId);
 
         void DeleteLike(UserLikes like);
 

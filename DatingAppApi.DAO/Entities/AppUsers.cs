@@ -38,6 +38,8 @@ namespace DatingAppApi.DAL.Entities
         public List<Photos> Photos { get; set; } = [];
         public List<UserLikes> LikedByUsers { get; set; } = [];
         public List<UserLikes> LikedUsers { get; set; } = [];
+        public List<Messages> MessagesSent { get; set; } = [];
+        public List<Messages> MessagesReceived { get; set; } = [];
     }
 }
 
