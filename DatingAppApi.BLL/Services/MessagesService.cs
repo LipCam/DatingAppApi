@@ -92,7 +92,7 @@ namespace DatingAppApi.BLL.Services
 
         public async Task<ResultDTO<string>> DeleteMessage(long id, string username)
         {
-            Messages messages = await _repository.GetMessage(id);
+            Messages? messages = await _repository.GetMessage(id);
 
             if(messages == null)
                 return ResultDTO<string>.Failure("Cannot delete this message");

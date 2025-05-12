@@ -1,16 +1,16 @@
 ﻿using DatingAppApi.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Cryptography;
-using System.Text;
 using System.Text.Json;
 
 namespace DatingAppApi.DAL.DB
 {
     public class Seed
     {
-        public static async Task SeedUsers(AppDBContext context)
+        //public static async Task SeedUsers(AppDBContext context)
+        public static async Task SeedUsers(UserManager<AppUsers> userManager, RoleManager<AppRole> roleManager)
         {
-            if (await context.AppUsers.AnyAsync())
+            if (await userManager.Users.AnyAsync())
                 return;
 
             var userData = await File.ReadAllTextAsync("DB/UserSeedData.json");
@@ -22,19 +22,46 @@ namespace DatingAppApi.DAL.DB
             if (users == null)
                 return;
 
-            foreach (var user in users)
+            var roles = new List<AppRole>
             {
-                using var hmac = new HMACSHA512();
+                new AppRole() { Name = "Admin" },
+                new AppRole() { Name = "Moderator" },
+                new AppRole() { Name = "Member" },
+            };
 
-                user.UserName = user.UserName!.ToLower();
-                user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Pa$$w0rd"));
-                user.PasswordSalt = hmac.Key;
-
-                context.AppUsers.Add(user);
+            foreach (var role in roles)
+            {
+                await roleManager.CreateAsync(role);
             }
 
-            var rowsAffected = await context.SaveChangesAsync();
-            Console.WriteLine($"Rows affected: {rowsAffected}");
+            var admin = new AppUsers
+            {
+                UserName = "admin",
+                KnownAs = "Admin",
+                Gender = "",
+                City = "",
+                Country = ""
+            };
+
+            await userManager.CreateAsync(admin, "Pa$$w0rd");
+            await userManager.AddToRolesAsync(admin, ["Admin", "Moderator"]);
+
+            foreach (var user in users)
+            {
+                //using var hmac = new HMACSHA512();
+
+                user.UserName = user.UserName!.ToLower();
+                //user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Pa$$w0rd"));
+                //user.PasswordSalt = hmac.Key;
+
+                //userManager.Users.Add(user);
+
+                await userManager.CreateAsync(user, "Pa$$w0rd");
+                await userManager.AddToRoleAsync(user, "Member");
+            }
+
+            //var rowsAffected = await userManager.SaveChangesAsync();
+            //Console.WriteLine($"Rows affected: {rowsAffected}");
         }
     }
 }

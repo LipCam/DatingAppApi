@@ -1,21 +1,37 @@
 ﻿using DatingAppApi.DAL.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace DatingAppApi.DAL.DB
 {
-    public class AppDBContext : DbContext
+    public class AppDBContext : IdentityDbContext<AppUsers, AppRole, long, 
+        IdentityUserClaim<long>, AppUserRole, IdentityUserLogin<long>, IdentityRoleClaim<long>, 
+        IdentityUserToken<long>> //DbContext
     {
         public AppDBContext(DbContextOptions options) : base(options)
         {
         }
 
-        public DbSet<AppUsers> AppUsers { get; set; }
+        //public DbSet<AppUsers> AppUsers { get; set; }
         public DbSet<UserLikes> UserLikes { get; set; }
         public DbSet<Messages> Messages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<AppUsers>()
+                .HasMany(s => s.UserRoles)
+                .WithOne(l => l.User)
+                .HasForeignKey(s => s.UserId)
+                .IsRequired();
+
+            builder.Entity<AppRole>()
+                .HasMany(s => s.UserRoles)
+                .WithOne(l => l.Role)
+                .HasForeignKey(s => s.RoleId)
+                .IsRequired();
 
             builder.Entity<UserLikes>()
                 .HasKey(k => new { k.SourceUserId, k.TargetUserId });

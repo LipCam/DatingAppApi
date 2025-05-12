@@ -25,7 +25,7 @@ namespace DatingAppApi.DAL.Repositories
             _dbContext.Remove(message);
         }
 
-        public IQueryable<Messages> GetAll(Expression<Func<Messages, bool>> filter = null)
+        public IQueryable<Messages> GetAll(Expression<Func<Messages, bool>>? filter)
         {
             return _dbContext.Messages.Where(filter);
         }

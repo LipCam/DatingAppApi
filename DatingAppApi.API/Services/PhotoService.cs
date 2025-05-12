@@ -92,7 +92,7 @@ namespace DatingAppApi.API.Services
             if (photos.IsMain)
                 return ResultDTO<string>.Failure("Cannot delete a main photo");
 
-            DeletionResult deletionResult = await DeletePhotoCloudinaryAsync(photos.PublicId);
+            DeletionResult deletionResult = await DeletePhotoCloudinaryAsync(photos.PublicId!);
 
             if (deletionResult.Error != null)
                 return ResultDTO<string>.Failure(deletionResult.Error.Message);

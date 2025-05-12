@@ -1,18 +1,20 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DatingAppApi.DAL.Entities
 {
     [Table("Users")]
-    public class AppUsers
+    public class AppUsers : IdentityUser<long>
     {
-        public long Id { get; set; }
 
-        [MaxLength(50)]
-        public string? UserName { get; set; }
+        //public long Id { get; set; }
 
-        public byte[] PasswordHash { get; set; } = [];
-        public byte[] PasswordSalt { get; set; } = [];
+        //[MaxLength(50)]
+        //public string? UserName { get; set; }
+
+        //public byte[] PasswordHash { get; set; } = [];
+        //public byte[] PasswordSalt { get; set; } = [];
         public DateOnly DateOfBirth { get; set; }
 
         [MaxLength(50)]
@@ -40,6 +42,7 @@ namespace DatingAppApi.DAL.Entities
         public List<UserLikes> LikedUsers { get; set; } = [];
         public List<Messages> MessagesSent { get; set; } = [];
         public List<Messages> MessagesReceived { get; set; } = [];
+        public ICollection<AppUserRole> UserRoles { get; set; } = [];
     }
 }
 

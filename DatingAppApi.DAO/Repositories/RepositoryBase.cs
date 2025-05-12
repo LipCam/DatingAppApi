@@ -14,7 +14,7 @@ namespace DatingAppApi.DAL.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>> filter = null)
+        public async Task<List<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null)
         {
             IQueryable<T> query = _dbContext.Set<T>();
 
@@ -26,7 +26,7 @@ namespace DatingAppApi.DAL.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>> filter = null)
+        public async Task<T> FirstOrDefaultAsync(Expression<Func<T, bool>>? filter = null)
         {
             return await _dbContext.Set<T>().FirstOrDefaultAsync(filter);
         }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using DatingAppApi.BLL.DTOs;
 using DatingAppApi.BLL.DTOs.Users;
 using DatingAppApi.BLL.Helpers;
 using DatingAppApi.BLL.Services.Interfaces;
@@ -21,12 +22,12 @@ namespace DatingAppApi.BLL.Services
             _mapper = mapper;
         }
 
-        public async Task<List<AppUsers>> GetAll(Expression<Func<AppUsers, bool>> filter = null)
+        public async Task<List<AppUsers>> GetAll(Expression<Func<AppUsers, bool>>? filter)
         {
             return await _repository.GetAllAsync(filter);
         }
 
-        public async Task<AppUsers> FirstOrDefault(Expression<Func<AppUsers, bool>> filter = null)
+        public async Task<AppUsers> FirstOrDefault(Expression<Func<AppUsers, bool>>? filter)
         {
             return await _repository.FirstOrDefaultAsync(filter);
         }
@@ -67,7 +68,7 @@ namespace DatingAppApi.BLL.Services
             var mimDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MaxAge - 1));
             var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-userParams.MinAge));
 
-            var users = _repository.GetAllUserAsync(p=> p.UserName != userParams.CurrentUserName 
+            var users = _repository.GetAllUser(p=> p.UserName != userParams.CurrentUserName 
                                                                 && (string.IsNullOrEmpty(userParams.Gender) || p.Gender == userParams.Gender)
                                                                 && p.DateOfBirth >= mimDob && p.DateOfBirth <= maxDob);
 
@@ -130,6 +131,42 @@ namespace DatingAppApi.BLL.Services
                 Message = "Could not find user";
 
             return Message;
+        }
+
+        public async Task<List<AppUserWithRolesDTO>> GetUsersWithRole()
+        {
+            return await _repository.GetAllUser()
+                .OrderBy(p => p.UserName)
+                .Select(x => new AppUserWithRolesDTO
+                {
+                    Id = x.Id,
+                    UserName = x.UserName!,
+                    Roles = x.UserRoles.Select(r => r.Role.Name).ToList()!
+                }).ToListAsync();
+        }
+
+        public async Task<ResultDTO<IList<string>>> EditRoles(string username, string roles)
+        {
+            var selectedRoles = roles.Split(',').ToArray();
+
+            AppUsers appUsers = await _repository.GetUserByUserNameAsync(username);
+
+            if (appUsers == null)
+                return ResultDTO<IList<string>>.Failure("User not found");
+
+            var userRoles = await _repository.GetRolesAsync(appUsers);
+
+            var result = await _repository.AddToRolesAsync(appUsers, selectedRoles.Except(userRoles));
+
+            if(!result.Succeeded)
+                return ResultDTO<IList<string>>.Failure("Fail to add to role");
+
+            result = await _repository.RemoveFromRolesAsync(appUsers, userRoles.Except(selectedRoles));
+
+            if (!result.Succeeded)
+                return ResultDTO<IList<string>>.Failure("Fail to remove from role");
+
+            return ResultDTO<IList<string>>.Success(await _repository.GetRolesAsync(appUsers));
         }
     }
 }

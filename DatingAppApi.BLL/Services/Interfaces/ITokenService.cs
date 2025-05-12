@@ -5,6 +5,6 @@ namespace DatingAppApi.BLL.Services.Interfaces
 {
     public interface ITokenService
     {
-        ResultDTO<string> CreateToken(AppUsers appUsers);
+        Task<ResultDTO<string>> CreateToken(AppUsers appUsers);
     }
 }

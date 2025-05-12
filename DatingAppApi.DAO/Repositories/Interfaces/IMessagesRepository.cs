@@ -8,7 +8,7 @@ namespace DatingAppApi.DAL.Repositories.Interfaces
         void AddMessage(Messages message);
         void DeleteMessage(Messages message);
         Task<Messages?> GetMessage(long id);
-        IQueryable<Messages> GetAll(Expression<Func<Messages, bool>> filter = null);
+        IQueryable<Messages> GetAll(Expression<Func<Messages, bool>>? filter = null);
         IQueryable<Messages> GetMessageThread(string currentUsername, string recipientUsername);
         IQueryable<Messages> GetUnreadMessages(string currentUsername);
         Task<bool> SaveAllAsync();

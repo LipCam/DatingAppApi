@@ -1,6 +1,7 @@
 ﻿using DatingAppApi.BLL.DTOs;
 using DatingAppApi.BLL.Services.Interfaces;
 using DatingAppApi.DAL.Entities;
+using DatingAppApi.DAL.Repositories.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,13 +13,15 @@ namespace DatingAppApi.BLL.Services
     public class TokenService : ITokenService
     {
         IConfiguration _configuration;
+        IUsersRepository _usersRepository;
 
-        public TokenService(IConfiguration configuration)
+        public TokenService(IConfiguration configuration, IUsersRepository usersRepository)
         {
             _configuration = configuration;
+            _usersRepository = usersRepository;
         }
 
-        public ResultDTO<string> CreateToken(AppUsers appUsers)
+        public async Task<ResultDTO<string>> CreateToken(AppUsers appUsers)
         {
             var tokenKey = _configuration["TokenKey"];
             if (tokenKey == null)
@@ -32,6 +35,10 @@ namespace DatingAppApi.BLL.Services
                 new Claim(ClaimTypes.NameIdentifier, appUsers.Id.ToString()),
                 new Claim(ClaimTypes.Name, appUsers.UserName!)
             };
+
+            var roles = await _usersRepository.GetRolesAsync(appUsers);
+
+            claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var tokenDescription = new SecurityTokenDescriptor()
             {
